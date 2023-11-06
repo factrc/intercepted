@@ -1,0 +1,56 @@
+#!/bin/sh
+
+# Copyright (c) 2010
+#
+# Author: lomaster
+#
+# /etc/init.d/interceptd
+#
+# 
+#
+### BEGIN INIT INFO
+# Provides: intercept
+# Required-Start: $network $syslog
+# Required-Stop:
+# Default-Start: 3 5
+# Default-Stop:
+# Description: collect and export packet from iDirect remote
+### END INIT INFO
+
+
+. /etc/rc.status
+
+# First reset status of this service
+rc_reset
+
+PINTD=${INTERCEPT_PATH}
+
+[ ! -r /etc/intercept/global.conf ] && exit 1;
+. /etc/intercept/global.conf
+
+start()
+{
+  echo -n "Starting interceptd daemon"
+  startproc $PINTD -d -p ${INTERCEPT_PORT} -S ${INTERCEPT_SRC} -s ${INTERCEPT_DST} -D ${INTERCEPT_MAC} -i ${INTERCEPT_DEV} -v ${INTERCEPT_VLAN}
+  rc_status -v
+}
+
+stop()
+{ 
+  echo -n "Shutting down interceptd daemon"
+  killproc -TERM $PINTD
+  rc_status -v
+}
+
+. /etc/rc.status
+
+case $1 in
+ start)   start;
+ ;;
+ stop)   stop;
+ ;;
+ restart)  stop; start; rc_status;
+ ;;
+ *)  echo -e "\n`basename $0` start|stop|restart\n"
+ ;;
+esac
